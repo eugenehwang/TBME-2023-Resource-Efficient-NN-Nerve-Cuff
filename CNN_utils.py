@@ -10,7 +10,6 @@ Created on Mon Jan 4 2021
 
 import tensorflow
 import numpy as np
-#import keras
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Layer, Lambda, concatenate, Input,Dense, Dropout,\
@@ -21,16 +20,10 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.activations import softmax
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
-# Won't be able to use any actual file things from File_utils
-# Maybe we need another utils 
+
 import File_utils_main
 from File_utils_main import Utils
 import math
-
-# import torch
-# import torch.nn as nn
-# import torch.nn.functional as F
-# import torch.optim as optim
 
 from enum import Enum
 
@@ -43,8 +36,6 @@ class Network(Enum):
 
 def get_formatted_labels(training_labels,test_labels,valid_labels,get_labels):
     '''
-    
-
     Returns 
     -------
     One-hot encoded labels for training, test and validation sets
@@ -82,8 +73,6 @@ def create_RNN(NN_hyperparameters,RAT_data):
     
     model = Sequential()
     model.add(Input(shape=(num_timesteps,data_dimension), name="input"))
-    # x = input_img
-    
     
     def get_RNN_layer(numfilters, return_sequences, input_shape, name, layer_type_enum,
                       activation):
@@ -138,8 +127,6 @@ def create_RNN(NN_hyperparameters,RAT_data):
     
     return model
 
-
-# TODO: Can probably clean up the parameters 
 def create_fully_conv_model(numfilters,dense_neurons,dropout_rate,filtsize,
                         num_subclasses=1,use_softmax=True,
                         stack_conv=1,channel_width_multiplier=1,
@@ -161,9 +148,6 @@ def create_fully_conv_model(numfilters,dense_neurons,dropout_rate,filtsize,
 
     x = Conv2D(numfilters, (1, 1), activation='relu', 
                padding='same', name = "conv1x1_2")(x)
-
-    
-    
 
     # Layer 3
     if num_layer > 2:
@@ -199,13 +183,11 @@ def create_fully_conv_model(numfilters,dense_neurons,dropout_rate,filtsize,
     
     x = Conv2D(3, (1, 1), name = "conv_1x1_class")(x)
     x = GlobalAveragePooling2D()(x)
-    # x = GlobalAveragePooling2D()(x)
-    # x = Dense(3)(x)
-
     if use_softmax:
         x = Activation('softmax')(x)
     
     return Model(inputs=[input_img], outputs = x)
+
 '''
 
 stack_conv: If we want to have multiple convolutional layers before a pooling 
@@ -218,57 +200,30 @@ def create_single_model(numfilters,dense_neurons,dropout_rate,filtsize,
                         use_1x1=False,num_1x1s=1,fully_conv=False):
     input_img = Input(shape=(56,100,1), name="input")
     x = input_img
-    # if conv_stack > 1:
+    
     for i in range(1,(stack_conv)+1):
         x = Conv2D(numfilters, (filtsize, filtsize), activation='relu', 
                    padding='same', name = "conv1-" + str(i))(x)
-        # x = BatchNormalization()(x)
-    # else:
-    #     x = Conv2D(numfilters, (filtsize, filtsize), activation='relu', 
-    #                padding='same', name = "conv1")(input_img)
-    
-    if use_1x1:
-        pass
-        # x = Conv2D(numfilters/2, (1, 1), activation='relu', 
-        #            padding='same', name = "conv1x1_1")(x)
-    
+
     x = MaxPooling2D((2, 2), padding='same', name = "MP1")(x)
 
-    # filtsize1 = int(filtsize / 2) + (filtsize % 2 > 0)
-    
-    # if conv_stack > 1:
     for i in range(1,stack_conv+1):
         x = Conv2D(numfilters*channel_width_multiplier, (filtsize, filtsize), activation='relu', 
                    padding='same', name = "conv2-" + str(i))(x)
-        # x = BatchNormalization()(x)
-    # else:
-    #     x = Conv2D(numfilters*channel_width_multiplier, (filtsize1, filtsize1), activation='relu', 
-    #                padding='same', name = "conv2")(x)
-    
+
     if use_1x1:
         x = Conv2D(numfilters, (1, 1), activation='relu', 
                    padding='same', name = "conv1x1_2")(x)
-        # x = BatchNormalization()(x)
-    
+        
     x = MaxPooling2D((2, 2), padding='same', name = "MP2")(x)
     
-    # filtsize2 = int(filtsize / 4) + (filtsize % 4 > 0)
-    
-    # if conv_stack > 1:
     for i in range(1,math.ceil(stack_conv/2)+1):
         x = Conv2D(numfilters*(channel_width_multiplier**2), (filtsize, filtsize), activation='relu', 
                    padding='same', name = "conv3-" + str(i))(x)
-        # x = BatchNormalization()(x)
-    # else:
-    #     x = Conv2D(numfilters*(channel_width_multiplier**2), (filtsize2, filtsize2), activation='relu', 
-    #                padding='same', name = "conv3")(x)
-    
+
     if use_1x1 and num_1x1s == 1:
         x = Conv2D(dense_neurons, (1, 1), activation='relu', 
                    name = "conv1x1_3")(x)
-        # x = BatchNormalization()(x)
-        # x = Conv2D(dense_neurons, (14, 25), activation='relu', 
-        #            name = "conv1x1_3")(x)
     elif use_1x1 and num_1x1s > 1:
         for i in range(1,num_1x1s+1):
             x = Conv2D(dense_neurons, (1, 1), activation='relu', 
@@ -288,7 +243,6 @@ def create_single_model(numfilters,dense_neurons,dropout_rate,filtsize,
         x = Conv2D(3, (1, 1), name = "conv_1x1_class")(x)
         x = GlobalAveragePooling2D()(x)
     elif use_1x1:
-        # x = Conv2D(3, (1, 1), name = "conv_1x1_class")(x)
         x = GlobalAveragePooling2D()(x)
         x = Dense(3)(x)
     else:
@@ -344,14 +298,12 @@ def create_combined_fully_conv_model(numfilters,dense_neurons,dropout_rate,filts
         if num_1x1s == 1:
             x1 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                         name = "conv1_1x1_3")(x1)
-            # x1 = BatchNormalization()(x1)
             x2 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                         name = "conv2_1x1_3")(x2)
         elif num_1x1s > 1:
             for i in range(1,num_1x1s+1):
                 x1 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                             name = "conv1_1x1_3" + str(i))(x1)
-                # x1 = BatchNormalization()(x1)
                 x2 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                             name = "conv2_1x1_3" + str(i))(x2)
     
@@ -368,14 +320,12 @@ def create_combined_fully_conv_model(numfilters,dense_neurons,dropout_rate,filts
         if num_1x1s == 1:
             x1 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                         name = "conv1_1x1_4")(x1)
-            # x1 = BatchNormalization()(x1)
             x2 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                         name = "conv2_1x1_4")(x2)
         elif num_1x1s > 1:
             for i in range(1,num_1x1s+1):
                 x1 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                             name = "conv1_1x1_4" + str(i))(x1)
-                # x1 = BatchNormalization()(x1)
                 x2 = Conv2D(dense_neurons, (1, 1), activation='relu', 
                             name = "conv2_1x1_4" + str(i))(x2)
     
@@ -387,9 +337,7 @@ def create_combined_fully_conv_model(numfilters,dense_neurons,dropout_rate,filts
     
     x = Conv2D(3, (1, 1), name = "conv_1x1_class")(x)
     x = GlobalAveragePooling2D()(x)
-    # x = GlobalAveragePooling2D()(x)
-    # x = Dense(3)(x)
-
+    
     if use_softmax:
         x = Activation('softmax')(x)
     
@@ -433,7 +381,6 @@ def create_combined_model(numfilters,dense_neurons,dropout_rate,filtsize,
     x2 = MaxPooling2D((2, 2), padding='same', name = "MP22")(x2)
     
     # Third Convolutional layer(s)
-    # TODO: stack_conv/2 isn't generalizable - if stack_conv is 1
     for i in range(1,math.ceil(stack_conv/2)+1):
         x1 = Conv2D(numfilters*(channel_width_multiplier**2), (filtsize, filtsize), activation='relu', 
                     padding='same', name = "conv13-" + str(i))(x1)
@@ -533,10 +480,6 @@ def transfer_weights(Int_model1, Int_model2, Combined_model,stack_conv = 1,
             Combined_model.get_layer("conv24-" + str(i)).set_weights(C24_w)     
 
     if use_1x1:
-        # C1_1x1_1_w = Int_model1.get_layer("conv1_1x1_1").get_weights()
-        # C2_1x1_1_w = Int_model2.get_layer("conv2_1x1_1").get_weights()   
-        # Combined_model.get_layer("conv1_1x1_1").set_weights(C1_1x1_1_w)
-        # Combined_model.get_layer("conv2_1x1_1").set_weights(C2_1x1_1_w)
         C1_1x1_2_w = Int_model1.get_layer("conv1x1_2").get_weights()
         C2_1x1_2_w = Int_model2.get_layer("conv1x1_2").get_weights()   
         Combined_model.get_layer("conv1_1x1_2").set_weights(C1_1x1_2_w)

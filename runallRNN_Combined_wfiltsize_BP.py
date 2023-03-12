@@ -17,39 +17,30 @@ restore_best_weights = False
 epochs = 1000
 batch_size = 50
 numspikes = 1000
-# numfilters_arr = [64]#8,12]#16,32]#32]##16,32]#32]
-# dense_neurons_arr = [32]#8,12,16]#16,32,64]#16,32,64]#32,64,16]#8,4]
 filter_dense_numlayers_arr = [[32,16,3]]
-# num_layers_arr = [3]#,4,5
-layer_type_enum_arr = [File_utils.LayerType.LSTM] #File_utils.LayerType.GRU, File_utils.LayerType.LSTM, 
+layer_type_enum_arr = [File_utils.LayerType.LSTM]
 activation_enum_arr = [None]#File_utils.Activation.TANH]
 filtsizes = [8]#8]#9]#9]
 dropout_rates = [0]#0]#0.5]#0.5
 channel_width_multiplier = 1
 use_attention = [True]
-# filepath = 'M:\\Peripheral Nerve Studies\\MCC Projects\\Ryan K\\CNNs\\Training_Sets_BP\\'
 print_model = True
 load_se_te = False
 load_combined = False
-train_with_crops = False
 
 
 ''' Rats fold 1-3 '''
 for i in range(2,11):
     for k in range(1,4):
-        # ERat FOR NEW DATASET COLLECTED BY EUGENE
         ratnum = 'Rat' + str(i)
         
         for filter_dense_numlayers in filter_dense_numlayers_arr:
             numfilters = filter_dense_numlayers[0]
             dense_neurons = filter_dense_numlayers[1]
             num_layers = filter_dense_numlayers[2]
-        # for dense_neurons in dense_neurons_arr:
-        #     for numfilters in numfilters_arr:
-            # numfilters = dense_neurons
+
             for filtsize in filtsizes:
                 for dropout_rate in dropout_rates:
-                    # for num_layers in num_layers_arr:
                     for layer_type_enum in layer_type_enum_arr:
                         for activation_enum in activation_enum_arr:
                             for use_attn in use_attention:
@@ -76,7 +67,6 @@ for i in range(2,11):
                                 directives["print_model"] = print_model
                                 directives["load_se_te"] = load_se_te
                                 directives["load_combined"] = load_combined
-                                directives["train_with_crops"] = train_with_crops
                                 RNN.runRNN_full(NN_hyperparameters,directives)
                                 
                                 

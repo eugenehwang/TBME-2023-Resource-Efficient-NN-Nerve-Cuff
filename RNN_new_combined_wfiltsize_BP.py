@@ -24,17 +24,11 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
 
-# TODO change this to use objects (like in create_excel) not so many parameters
 def runRNN_full(NN_hyperparameters,directives):
-        # Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,
-        #         numfilters,filtsize, dropout_rate,dense_neurons,
-        #         channel_width_multiplier,print_model,train_with_crops):
-    
     foldnum = NN_hyperparameters["foldnum"]
     numfilters = NN_hyperparameters["numfilters"]
     numspikes = NN_hyperparameters["numspikes"]
     Ratnum = directives["ratnum"]
-    train_with_crops = directives["train_with_crops"]
     
     folder = Ratnum + '\\RNN\\CM_CM_C' + str(numfilters)
     folder = folder + '\\'
@@ -43,9 +37,6 @@ def runRNN_full(NN_hyperparameters,directives):
     directives["filename_prefix"] = get_filename_prefix(NN_hyperparameters,
                                                         directives)
     
-    # TODO
-    if train_with_crops:
-        folder = folder + "_crop"
     folder = folder + '\\'
     print(Ratnum + ': Fold ' + str(foldnum) + ' starting')
     
@@ -56,32 +47,15 @@ def runRNN_full(NN_hyperparameters,directives):
     
     Int_model_tp = None
     RAT_data_tp = None
-    # if not print_model:
-    if train_with_crops:
-        RAT_data_sp = PP_crop.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
-        RAT_data_sp.Randomize_Train_and_getValidSet(RAT_data_sp.training_set,
-                                                    RAT_data_sp.training_labels,
-                                                    numspikes)
-        RAT_data_sp.Reshape_data_set_RNN()
-        # Get cropped dataset, with 4x the amount of data, so 4x the amount of validation points needed 
-        RAT_data_sp.Randomize_Train_and_getValidSet(RAT_data_sp.training_set_cropped,RAT_data_sp.training_labels_cropped,numspikes*4,update_cropped=True)
-        RAT_data_tp = PP2_crop.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
-        # RAT_data_tp.Reshape_data_set(RAT_data_tp.training_set,RAT_data_tp.test_set)
-        RAT_data_tp.Randomize_Train_and_getValidSet2(RAT_data_tp.training_set,RAT_data_tp.training_labels,RAT_data_sp.samples1,RAT_data_sp.samples2,
-                                             RAT_data_sp.samples3,numspikes)
-        # Get cropped dataset, with 4x the amount of data, so 4x the amount of validation points needed 
-        RAT_data_tp.Randomize_Train_and_getValidSet2(RAT_data_tp.training_set_cropped,RAT_data_tp.training_labels_cropped,RAT_data_sp.samples1_cropped,RAT_data_sp.samples2_cropped,
-                                             RAT_data_sp.samples3_cropped,numspikes*4,update_cropped=True)
-        RAT_data_tp.Reshape_data_set_RNN()
-    else:
-        RAT_data_sp = PP.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
-        RAT_data_sp.Randomize_Train_and_getValidSet(RAT_data_sp.training_set,RAT_data_sp.training_labels,numspikes)
-        RAT_data_sp.Reshape_data_set_RNN()
-        RAT_data_tp = PP2.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
-        RAT_data_tp.Randomize_Train_and_getValidSet2(RAT_data_tp.training_set,RAT_data_tp.training_labels,RAT_data_sp.samples1,RAT_data_sp.samples2,
-                                             RAT_data_sp.samples3,numspikes)
-        RAT_data_tp.Reshape_data_set_RNN()
-       
+    
+    RAT_data_sp = PP.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
+    RAT_data_sp.Randomize_Train_and_getValidSet(RAT_data_sp.training_set,RAT_data_sp.training_labels,numspikes)
+    RAT_data_sp.Reshape_data_set_RNN()
+    RAT_data_tp = PP2.Preprocessing_module(Ratnum,foldnum,is_RNN=(True))
+    RAT_data_tp.Randomize_Train_and_getValidSet2(RAT_data_tp.training_set,RAT_data_tp.training_labels,RAT_data_sp.samples1,RAT_data_sp.samples2,
+                                         RAT_data_sp.samples3,numspikes)
+    RAT_data_tp.Reshape_data_set_RNN()
+   
     print(Ratnum + ': Fold ' + str(foldnum) + ' Spatial and Temporal Emphasis data loaded')
     
     ### 2) Call neural network trainer
@@ -108,14 +82,11 @@ def get_filename_prefix(NN_hyperparameters,directives,prefix = ""):
     loss_function_enum = NN_hyperparameters.get("loss_function_enum", None)
     use_attention = NN_hyperparameters.get("use_attention", False)
     
-    
     Ratnum = directives["ratnum"]
     
     filename_prefix = (Ratnum + '_DF_PF_Prick_wnoise_CM_CM_CDD_RNN' + prefix 
                        + '_fold' + str(foldnum))
-            # + '_filtsize_' + str(filtsize) 
-            # + '_dropoutrate_' + 
-            # str(dropout_rate) 
+
     if num_layers != None: 
         filename_prefix = filename_prefix + 'num_layers' + str(num_layers)
             
@@ -126,8 +97,7 @@ def get_filename_prefix(NN_hyperparameters,directives,prefix = ""):
         filename_prefix = filename_prefix + 'actv' + activation_enum.name
         
     filename_prefix = filename_prefix + '_denseneur' + str(dense_neurons)
-            # + '_cwm' + 
-            # str(channel_width_multiplier) + '_1x1s' + str(num_1x1s))
+
     if loss_function_enum:
         filename_prefix += '_' + loss_function_enum.name
     

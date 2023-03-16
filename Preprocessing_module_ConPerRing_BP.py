@@ -20,14 +20,7 @@ class Preprocessing_module:
         load_filename = 'D:\\Eugene\\Training_Sets_ConPerRing\\' + Ratnum + 'Training_Fold' + str(foldnum)
         
         self.numcons = 56
-        # Use mapping to get new dataset collected by Eugene
-        if "ERat" in Ratnum:
-            self.numcons = 64
-            if foldnum > 0:
-                load_filename = File_utils.new_dataset_mapping[Ratnum] + 'Training_Sets_ConPerRing\\Training_Fold' + str(foldnum) + '_RAW'
-            else:
-                load_filename = File_utils.new_dataset_mapping[Ratnum] + 'Training_Sets_ConPerRing\\Dataset_RAW'
-        # RAT = scipy.io.loadmat('M:\\Peripheral Nerve Studies\\MCC Projects\\Ryan K\\CNNs\\Training_Sets_BP\\Training_Sets_ConPerRing\\' + Ratnum + 'Training_Fold' + str(foldnum))
+        
         RAT = scipy.io.loadmat(load_filename)
         
         training_data = RAT['training_data_rat'];
@@ -42,9 +35,6 @@ class Preprocessing_module:
         else:
             test_data = test_data.reshape(test_data.shape[0],self.numcons,100,1)
             training_data = training_data.reshape(training_data.shape[0],self.numcons,100,1)
-        
-        # plt.imshow(np.mean(test_data,0).reshape(64,100))
-        # plt.show()
         
         self.training_set = training_data
         self.training_labels = RAT['training_data_labels']

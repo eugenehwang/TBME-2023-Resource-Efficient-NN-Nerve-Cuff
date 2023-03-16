@@ -16,7 +16,6 @@ from File_utils import File_utils
 import CNN_utils as CNN_utils
 
 import tensorflow
-#import keras
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Input,Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D
@@ -41,7 +40,6 @@ def runRNN_full(NN_hyperparameters,directives):
     print(Ratnum + ': Fold ' + str(foldnum) + ' starting')
     
     #### 1) Loading dataset: Grabbing Spatial/Temporal Emphasis data
-    
     Int_model_sp = None
     RAT_data_sp = None
     

@@ -13,7 +13,6 @@ import scipy
 from File_utils import File_utils
 
 import tensorflow
-#import keras
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Input,Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D
@@ -31,9 +30,6 @@ def runCNN_full(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,num
     
     Int_model_tp = None
     RAT_DATA_tp = None
-    # if print_model:
-    #     [Int_model_tp,RAT_DATA_tp] = CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,None, \
-    #                                                          None,None,numfilters,filtsize, dropout_rate,dense_neurons,print_model)
     
     [Int_model_tp,RAT_DATA_tp] = CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,RAT_DATA_sp.samples1, \
                                                          RAT_DATA_sp.samples2,RAT_DATA_sp.samples3,numfilters,filtsize, dropout_rate,dense_neurons,channel_width_multiplier,num_layer,print_model)
@@ -121,7 +117,7 @@ def CNN_CM_CM_DD(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,nu
     
     if print_model:
         print(Initial_guess1.summary())
-    # else:
+
     Initial_guess1.fit(RAT_data.training_set, labels_training,
               epochs=25,batch_size = size_batch, shuffle=True,
               validation_data=(RAT_data.valid_set, labels_valid))
@@ -169,11 +165,6 @@ def CNN_CM_CM_DD(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,nu
         
         last_layer = Conv4_out
         last_layer_name = "conv4"
-    # conv1x1 = Conv2D(numfilters/2, (1, 1), activation='relu', 
-    #                name = "conv1x1")(Conv3_out)
-    
-    # conv1x1 = Conv2D(numfilters/4, (1, 1), activation='relu', 
-    #                name = "conv1x1-2")(conv1x1)
     
     out = Flatten()(last_layer)
     dense1 = Dense(dense_neurons, activation='relu', name = "Den1")(out)
@@ -194,14 +185,10 @@ def CNN_CM_CM_DD(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,nu
     
     if print_model:
         print(Full_model.summary())
-        # return [Intermediate_model, RAT_data]
     
     history = Full_model.fit(RAT_data.training_set, labels_training,
                   epochs=numepochs,batch_size = size_batch, shuffle=True,
                   validation_data=(RAT_data.valid_set, labels_valid), callbacks=[early_stopping_monitor])
-          
-#    model.fit(training_data, labels_training, shuffle = True,
-#              epochs=numepochs,batch_size = size_batch)
     
     score = Full_model.evaluate(RAT_data.test_set, labels_test)
     np.disp(score)
@@ -210,11 +197,7 @@ def CNN_CM_CM_DD(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,nu
     folder = Ratnum + '\\CM_CM_C' + str(numfilters) + '\\'
     filename_prefix = Ratnum + '_DF_PF_Prick_wnoise_CM_CM_CDD_fold' + str(foldnum) + '_filtsize_' + str(filtsize) + '_denselayerdropoutrate_' + str(dropout_rate) + '_denseneurons_' + str(dense_neurons) + '_cwm' + str(channel_width_multiplier) + '_numlayer' + str(num_layer)
     
-    # TEMP
-    # filename_prefix += '_2'
-    
     File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels,history)
-    
     
     del Full_model
     
@@ -344,11 +327,6 @@ def CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,n
         
         last_layer = Conv4_out
         last_layer_name = "conv4"
-    # conv1x1 = Conv2D(numfilters/2, (1, 1), activation='relu', 
-    #                name = "conv1x1")(Conv3_out)
-    
-    # conv1x1 = Conv2D(numfilters/4, (1, 1), activation='relu', 
-    #                name = "conv1x1-2")(conv1x1)
     
     out = Flatten()(last_layer)
     dense1 = Dense(dense_neurons, activation='relu', name = "Den1")(out)
@@ -368,14 +346,10 @@ def CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,n
     
     if print_model:
         print(Full_model.summary())
-        # return [Intermediate_model, RAT_data]
     
     history = Full_model.fit(RAT_data.training_set, labels_training,
           epochs=numepochs,batch_size = size_batch, shuffle=True,
           validation_data=(RAT_data.valid_set, labels_valid), callbacks=[early_stopping_monitor])
-          
-#    model.fit(training_data, labels_training, shuffle = True,
-#              epochs=numepochs,batch_size = size_batch)
     
     score = Full_model.evaluate(RAT_data.test_set, labels_test)
     np.disp(score)
@@ -383,9 +357,6 @@ def CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,n
     
     folder = Ratnum + '\\CM_CM_C' + str(numfilters) + '\\'
     filename_prefix = Ratnum + '_DF_PF_Prick_wnoise_CM_CM_CDD_ConPerRing_fold' + str(foldnum) + '_filtsize_' + str(filtsize) + '_denselayerdropoutrate_' + str(dropout_rate) + '_denseneurons_' + str(dense_neurons) + '_cwm' + str(channel_width_multiplier) + '_numlayer' + str(num_layer)
-    
-    # TEMP
-    # filename_prefix += '_2'
     
     File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels,history)
       
@@ -465,16 +436,7 @@ def combined_models_to_dense(Int_model1,Int_model2,RAT_data,RAT_data2,Ratnum,fol
         
         last_layer1 = Conv14_out
         last_layer2 = Conv24_out
-    # conv1x1_1 = Conv2D(numfilters/2, (1, 1), activation='relu', 
-    #                name = "conv1x1_1")(Conv13_out)
-    # conv1x1_2 = Conv2D(numfilters/2, (1, 1), activation='relu', 
-    #                name = "conv1x1_2")(Conv23_out)
-    
-    # conv1x1_1 = Conv2D(numfilters/4, (1, 1), activation='relu', 
-    #                name = "conv1x1-2_1")(conv1x1_1)
-    # conv1x1_2 = Conv2D(numfilters/4, (1, 1), activation='relu', 
-    #                name = "conv1x1-2_2")(conv1x1_2)
-        
+     
     Merged_input_bf_DENSE = tensorflow.keras.layers.concatenate([last_layer1, last_layer2])   
     
     Flat_out = Flatten()(Merged_input_bf_DENSE)
@@ -508,12 +470,6 @@ def combined_models_to_dense(Int_model1,Int_model2,RAT_data,RAT_data2,Ratnum,fol
         C14_w = Int_model1.get_layer("conv4").get_weights()
         C24_w = Int_model2.get_layer("conv4").get_weights() 
     
-    # C1x1_1_w = Int_model1.get_layer("conv1x1").get_weights()
-    # C1x1_2_w = Int_model2.get_layer("conv1x1").get_weights()  
-    
-    # C1x1_2_1_w = Int_model1.get_layer("conv1x1-2").get_weights()
-    # C1x1_2_2_w = Int_model2.get_layer("conv1x1-2").get_weights()  
-    
     Combined_model.get_layer("conv11").set_weights(C11_w)
     Combined_model.get_layer("conv21").set_weights(C21_w)
     
@@ -537,26 +493,6 @@ def combined_models_to_dense(Int_model1,Int_model2,RAT_data,RAT_data2,Ratnum,fol
         Combined_model.get_layer("conv14").set_weights(C14_w)
         Combined_model.get_layer("conv24").set_weights(C24_w)  
     
-    # Combined_model.get_layer("conv1x1_1").set_weights(C1x1_1_w)
-    # Combined_model.get_layer("conv1x1_2").set_weights(C1x1_2_w)  
-    
-    # Combined_model.get_layer("conv1x1-2_1").set_weights(C1x1_2_1_w)
-    # Combined_model.get_layer("conv1x1-2_2").set_weights(C1x1_2_2_w)  
-    
-#    Combined_model.get_layer("conv11").trainable = False
-#    Combined_model.get_layer("conv21").trainable = False
-#    
-#    Combined_model.get_layer("MP11").trainable = False
-#    Combined_model.get_layer("MP21").trainable = False
-#    
-#    Combined_model.get_layer("conv12").trainable = False
-#    Combined_model.get_layer("conv22").trainable = False
-#    
-#    Combined_model.get_layer("MP12").trainable = False
-#    Combined_model.get_layer("MP22").trainable = False
-#    
-#    Combined_model.get_layer("conv13").trainable = False
-#    Combined_model.get_layer("conv23").trainable = False  
     
     sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     Combined_model.compile(loss='categorical_crossentropy',
@@ -576,7 +512,6 @@ def combined_models_to_dense(Int_model1,Int_model2,RAT_data,RAT_data2,Ratnum,fol
     
     if print_model:
         print(Combined_model.summary())
-        # return None
     
     history = Combined_model.fit([RAT_data.training_set, RAT_data2.training_set], labels_training,
               epochs=1000,batch_size = size_batch, shuffle=True,
@@ -588,9 +523,6 @@ def combined_models_to_dense(Int_model1,Int_model2,RAT_data,RAT_data2,Ratnum,fol
     
     folder = Ratnum + '\\CM_CM_C' + str(numfilters) + '\\'
     filename_prefix = Ratnum + '_DF_PF_Prick_wnoise_CM_CM_CDD_Combined_fold' + str(foldnum) + '_filtsize_' + str(filtsize) + '_denselayerdropoutrate_' + str(dropout_rate) + '_denseneurons_' + str(dense_neurons) + '_cwm' + str(channel_width_multiplier) + '_numlayer' + str(num_layer)
-    
-    # TEMP
-    # filename_prefix += '_2'
     
     File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels,history,Full_model=Combined_model)
       

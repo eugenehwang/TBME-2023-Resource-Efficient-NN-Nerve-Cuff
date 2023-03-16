@@ -12,23 +12,18 @@ import Preprocessing_module_BP_crop_aug as PP_crop
 import Preprocessing_module_ConPerRing_BP_crop_aug as PP2_crop
 from File_utils import File_utils
 import CNN_utils as CNN_utils
-# import Distiller
 import numpy as np
 import scipy
 import sys
 
 
 import tensorflow as tf
-# TF 2
-#from tensorflow.math import reduce_sum, log, exp, reduce_mean, reduce_std
-# TF 1
+
 from tensorflow.math import log, exp
 from tensorflow import reduce_sum, reduce_mean
-# TF 2
-#from tensorflow.linalg import matmul
-# TF 1
+
 from tensorflow import matmul
-#import keras
+
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras import layers
@@ -36,7 +31,6 @@ from tensorflow.keras.layers import Lambda, concatenate, Input,Dense, Dropout, A
 from tensorflow.keras.losses import categorical_crossentropy as cat_crossent
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.activations import softmax
-#from tensorflow.keras.utils import np_utils
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -73,7 +67,6 @@ def runCNN_full(Ratnum,foldnum,numepochs,size_batch,valid_patience,min_delta,num
     
     Int_model_tp = None
     RAT_data_tp = None
-    # if not print_model:
     if train_with_crops:
         RAT_data_sp = PP_crop.Preprocessing_module(Ratnum,foldnum)
         RAT_data_sp.Randomize_Train_and_getValidSet(RAT_data_sp.training_set,RAT_data_sp.training_labels,numspikes)
@@ -197,7 +190,6 @@ def CNN_CM_CM_DD(Ratnum,foldnum,folder,RAT_data,RAT_data2,network_type,prefix,nu
     labels_test = None
     labels_valid = None
     
-    # if not print_model:
     labels_training = to_categorical(RAT_data.training_labels - 1, None)
     labels_test = to_categorical(RAT_data.test_labels - 1, None)
     labels_valid = to_categorical(RAT_data.valid_labels - 1, None)
@@ -218,8 +210,6 @@ def CNN_CM_CM_DD(Ratnum,foldnum,folder,RAT_data,RAT_data2,network_type,prefix,nu
                                                channel_width_multiplier=channel_width_multiplier,
                                                use_1x1=True,num_1x1s=num_1x1s,fully_conv=fully_conv,num_layer=num_layer)
     
-    # Make sure by creating Initial_guess1 and Initial_guess2, the weights in
-    # Full_model actually get updated
     Intermediate_model = pretrain_single_model(folder,filename_prefix,Full_model,False,numepochs,dense_neurons,
                           num_subclasses,RAT_data,RAT_data2,
                           labels_training,labels_valid,labels_test,
@@ -241,7 +231,7 @@ def CNN_CM_CM_DD(Ratnum,foldnum,folder,RAT_data,RAT_data2,network_type,prefix,nu
         class_probs = Full_model.predict(RAT_data2.test_set)
 
     
-    File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels) # ,history,Intermediate_model=Intermediate_model -->pretrain_single_model saves these
+    File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels)
     
     
     del Full_model
@@ -320,20 +310,13 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
             return Intermediate_model
     
     input_img = Full_model.get_layer("input").input
-    # Conv1_out = Full_model.get_layer("conv1x1_1")
     Conv1_out = Full_model.get_layer("conv1-" +str(stack_conv))
     MPool1 = MaxPooling2D((4, 4), padding='same', name = "mpool1")(Conv1_out.output)
     
-    # x = Conv2D(dense_neurons, (14, 25), activation='relu')(MPool1)
     x = GlobalAveragePooling2D()(MPool1)
-    # x = Conv2D(3, (1, 1))(x)
+    
     x = Dense(3)(x)
     x = Activation('softmax')(x)
-    
-    
-    # x = Dense(dense_neurons)(Flatten(MPool1))
-    # x = Dense(3, activation='softmax')
-    
     
     Initial_guess1_model = Model(input_img,x)
     
@@ -350,14 +333,12 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
     score = None
     if network_type == Network.SPATIAL:
         if train_with_crops:
-            # Might overload memory?
             fit_cropped_dataset(Initial_guess1,
                                 RAT_data.training_set_cropped,
                                 labels_training_cropped,
                                 RAT_data.valid_set_cropped,
                                 labels_valid_cropped,
                                 epochs=10,batch_size=size_batch,shuffle=True)
-            # Second call to fit, using crops
         else:
             Initial_guess1.fit(RAT_data.training_set, labels_training,
                   epochs=25,batch_size = size_batch, shuffle=True,
@@ -365,7 +346,6 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
         score = Initial_guess1.evaluate(RAT_data.test_set, labels_test)
     elif network_type == Network.TEMPORAL:
         if train_with_crops:
-            # Second call to fit, using crops
             fit_cropped_dataset(Initial_guess1,
                                 RAT_data2.training_set_cropped,
                                 labels_training_cropped,
@@ -380,12 +360,9 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
     np.disp(score)
     
     Conv2_out = Full_model.get_layer("conv1x1_2")
-    # Conv2_out = Full_model.get_layer("conv2-" +str(stack_conv))
     MPool2 = MaxPooling2D((2, 2), padding='same', name = "mpool2")(Conv2_out.output)
     
-    # x = Conv2D(dense_neurons, (14, 25), activation='relu')(MPool2)
     x = GlobalAveragePooling2D()(MPool2)
-    # x = Conv2D(3, (1, 1))(x)
     x = Dense(3)(x)
     x = Activation('softmax')(x)
     
@@ -418,11 +395,9 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
             Initial_guess2.fit(RAT_data.training_set, labels_training,
                   epochs=25,batch_size = size_batch, shuffle=True,
                   validation_data=(RAT_data.valid_set, labels_valid))
-            # Second call to fit, using crops
         score = Initial_guess2.evaluate(RAT_data.test_set, labels_test)
     elif network_type == Network.TEMPORAL:
         if train_with_crops:
-            # Second call to fit, using crops
             fit_cropped_dataset(Initial_guess2,
                                 RAT_data2.training_set_cropped,
                                 labels_training_cropped,
@@ -449,9 +424,7 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
     early_stopping_monitor = None
     if valid_patience > 0:
         early_stopping_monitor = EarlyStopping(patience=valid_patience,
-                                               min_delta=min_delta)#,
-#                                               restore_best_weights=(True))
-    
+                                               min_delta=min_delta)
     history = None
 
     
@@ -465,7 +438,6 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
     
     if network_type == Network.SPATIAL:
         if train_with_crops:
-            # Second call to fit, using crops
             fit_cropped_dataset(Full_model,
                                 RAT_data.training_set_cropped,
                                 labels_training_cropped,
@@ -482,8 +454,6 @@ def pretrain_single_model(folder,filename_prefix,Full_model,load_student,
     
     elif network_type == Network.TEMPORAL:
         if train_with_crops:
-            # Second call to fit, using crops
-            # TODO: Multiple histories?
             fit_cropped_dataset(Full_model,
                                 RAT_data2.training_set_cropped,
                                 labels_training_cropped,
@@ -560,9 +530,6 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
         
         sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
         
-        # Set from_logits=False if we have a softmax activation at the end of 
-        # our network
-#        loss_func = keras.losses.CategoricalCrossentropy()
         Combined_model.compile(loss='categorical_crossentropy',
                       optimizer=sgd,
                       metrics=['accuracy',f1_score()],)
@@ -591,11 +558,10 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
     
     early_stopping_monitor = None
     if valid_patience > 0:
-        early_stopping_monitor = EarlyStopping(patience=valid_patience,min_delta=min_delta)#,
-#                                               restore_best_weights=(True))
+        early_stopping_monitor = EarlyStopping(patience=valid_patience,min_delta=min_delta)
     
     history = None
-    # If we're not loading the model from a file, train it
+    
     if not load_combined:
         if valid_patience > 0:
             if train_with_crops:
@@ -606,10 +572,6 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
                                     labels_valid_cropped,
                                     epochs=numepochs,batch_size=size_batch,shuffle=True,
                                     early_stopping_monitor=early_stopping_monitor)
-                # history = Combined_model.fit([RAT_data.training_set_cropped, RAT_data2.training_set_cropped], labels_training_cropped,
-                #           epochs=numepochs,batch_size = size_batch, shuffle=True,
-                #           validation_data=([RAT_data.valid_set_cropped, RAT_data2.valid_set_cropped], labels_valid_cropped), callbacks=[early_stopping_monitor])
-            # Second call to fit, using crops
             else:
                 history = Combined_model.fit([RAT_data.training_set, RAT_data2.training_set], labels_training,
                       epochs=numepochs,batch_size = size_batch, shuffle=True,
@@ -617,16 +579,12 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
         else:
             
             if train_with_crops:
-                # history = Combined_model.fit([RAT_data.training_set_cropped, RAT_data2.training_set_cropped], labels_training_cropped,
-                #           epochs=numepochs,batch_size = size_batch, shuffle=True,
-                #           validation_data=([RAT_data.valid_set_cropped, RAT_data2.valid_set_cropped], labels_valid_cropped))
                 fit_cropped_dataset(Combined_model,
                                     [RAT_data.training_set_cropped, RAT_data2.training_set_cropped],
                                     labels_training_cropped,
                                     [RAT_data.valid_set_cropped, RAT_data2.valid_set_cropped],
                                     labels_valid_cropped,
                                     epochs=numepochs,batch_size=size_batch,shuffle=True)
-            # Second call to fit, using crops
             else:
                 history = Combined_model.fit([RAT_data.training_set, RAT_data2.training_set], labels_training,
                       epochs=numepochs,batch_size = size_batch, shuffle=True,
@@ -639,7 +597,6 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
     if not load_combined:
         class_probs = Combined_model.predict([RAT_data.test_set, RAT_data2.test_set])
     
-        # Let's save the teacher
         File_utils.save_files(folder,filename_prefix,class_probs,RAT_data.test_labels,history,Full_model=Combined_model)
 
     

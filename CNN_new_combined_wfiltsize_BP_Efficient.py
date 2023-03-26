@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 20 10:09:27 2018
-
-@author: kohr
-
-"""
-
 import Preprocessing_module_BP as PP
 import Preprocessing_module_ConPerRing_BP as PP2
 import numpy as np
@@ -27,9 +19,6 @@ def runCNN_full(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,num
     [Int_model_sp,RAT_DATA_sp] = CNN_CM_CM_DD(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,numfilters,filtsize, dropout_rate,dense_neurons,channel_width_multiplier,num_layer,print_model)
         
     print(Ratnum + ': Fold ' + str(foldnum) + ' spatial_done')
-    
-    Int_model_tp = None
-    RAT_DATA_tp = None
     
     [Int_model_tp,RAT_DATA_tp] = CNN_CM_CM_DD_ConPerRing(Ratnum,foldnum,numepochs,size_batch,valid_patience,numspikes,RAT_DATA_sp.samples1, \
                                                          RAT_DATA_sp.samples2,RAT_DATA_sp.samples3,numfilters,filtsize, dropout_rate,dense_neurons,channel_width_multiplier,num_layer,print_model)

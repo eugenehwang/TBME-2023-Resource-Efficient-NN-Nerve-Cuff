@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 25 15:00:22 2018
-
-@author: kohr
-"""
-
 import RNN_new_combined_wfiltsize_BP as RNN
 from File_utils import File_utils 
 
@@ -28,10 +21,8 @@ print_model = True
 load_se_te = False
 load_combined = False
 
-
-''' Rats fold 1-3 '''
 for i in range(2,11):
-    for k in range(1,4):
+    for fold in range(1,4):
         ratnum = 'Rat' + str(i)
         
         for filter_dense_numlayers in filter_dense_numlayers_arr:
@@ -47,7 +38,7 @@ for i in range(2,11):
                         
                                 NN_hyperparameters.clear()
                                 directives.clear()
-                                NN_hyperparameters["foldnum"] = k
+                                NN_hyperparameters["foldnum"] = fold
                                 NN_hyperparameters["epochs"] = epochs
                                 NN_hyperparameters["batch_size"] = batch_size
                                 NN_hyperparameters["valid_patience"] = valid_patience

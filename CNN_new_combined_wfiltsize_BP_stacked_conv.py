@@ -1,17 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 20 10:09:27 2018
-
-@author: kohr
-
-"""
-
 import Preprocessing_module_BP as PP
 import Preprocessing_module_ConPerRing_BP as PP2
 import Preprocessing_module_BP_crop_aug as PP_crop
 import Preprocessing_module_ConPerRing_BP_crop_aug as PP2_crop
 from File_utils import File_utils
-import CNN_utils as CNN_utils
+import NN_utils as NN_utils
 import numpy as np
 import scipy
 import sys
@@ -205,7 +197,7 @@ def CNN_CM_CM_DD(Ratnum,foldnum,folder,RAT_data,RAT_data2,network_type,prefix,nu
     
     num_subclasses = 1
     use_softmax = True
-    Full_model = CNN_utils.create_fully_conv_model(numfilters, dense_neurons, dropout_rate, filtsize, num_subclasses, use_softmax,
+    Full_model = NN_utils.create_fully_conv_model(numfilters, dense_neurons, dropout_rate, filtsize, num_subclasses, use_softmax,
                                                stack_conv=stack_conv,
                                                channel_width_multiplier=channel_width_multiplier,
                                                use_1x1=True,num_1x1s=num_1x1s,fully_conv=fully_conv,num_layer=num_layer)
@@ -521,12 +513,12 @@ def combined_models_to_dense(folder,Int_model1,Int_model2,RAT_data,RAT_data2,Rat
     if load_combined:
         Combined_model = File_utils.load_model(folder,filename_prefix,dependencies)
     else:
-        Combined_model = CNN_utils.create_combined_fully_conv_model(numfilters,dense_neurons,dropout_rate,filtsize,
+        Combined_model = NN_utils.create_combined_fully_conv_model(numfilters,dense_neurons,dropout_rate,filtsize,
                                                          stack_conv=stack_conv,
                                                          channel_width_multiplier=channel_width_multiplier,
                                                          use_1x1=True,num_1x1s=num_1x1s,fully_conv=fully_conv,num_layer=num_layer)
         
-        CNN_utils.transfer_weights(Int_model1, Int_model2, Combined_model,stack_conv,num_1x1s=num_1x1s,fully_conv=fully_conv,num_layer=num_layer)
+        NN_utils.transfer_weights(Int_model1, Int_model2, Combined_model,stack_conv,num_1x1s=num_1x1s,fully_conv=fully_conv,num_layer=num_layer)
         
         sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
         

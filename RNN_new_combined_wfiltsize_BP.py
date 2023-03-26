@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 20 10:09:27 2018
-
-@author: kohr
-
-"""
-
 import Preprocessing_module_BP as PP
 import Preprocessing_module_ConPerRing_BP as PP2
 import Preprocessing_module_BP_crop_aug as PP_crop
@@ -13,7 +5,7 @@ import Preprocessing_module_ConPerRing_BP_crop_aug as PP2_crop
 import numpy as np
 import scipy
 from File_utils import File_utils
-import CNN_utils as CNN_utils
+import NN_utils as NN_utils
 
 import tensorflow
 from tensorflow.keras import backend as K
@@ -112,22 +104,20 @@ def train_NN(RAT_data_sp,RAT_data_tp,NN_hyperparameters,directives):
     # Create RNN
     [labels_training, 
      labels_test, 
-     labels_valid] = CNN_utils.get_formatted_labels(
+     labels_valid] = NN_utils.get_formatted_labels(
         RAT_data_tp.training_labels,
         RAT_data_tp.test_labels,
         RAT_data_tp.valid_labels,get_labels=True)
          
     num_subclasses = 1
     use_softmax = True
-    model = CNN_utils.create_RNN(NN_hyperparameters,RAT_data_tp)
+    model = NN_utils.create_RNN(NN_hyperparameters,RAT_data_tp)
     
-        
-    directives["inputs_list"] = [CNN_utils.Network.SPATIAL]
+    directives["inputs_list"] = [NN_utils.Network.SPATIAL]
     
-    [history, class_probs, model] = CNN_utils.train_model(model,NN_hyperparameters,
+    [history, class_probs, model] = NN_utils.train_model(model,NN_hyperparameters,
                                                    directives,RAT_data_sp,RAT_data_tp)
         
-    
     if not load_combined:
     
         # Let's save the teacher
